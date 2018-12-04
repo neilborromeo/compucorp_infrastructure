@@ -1,0 +1,68 @@
+- name: Get root block device
+  shell: lsblk -l | grep / | awk '{print $1}'
+  register: block_device
+  tags: filesystem
+
+- name: Get disk name
+  shell: lsblk -l | grep / | awk '{print $1}' | tr -d [:digit:]
+  register: disk_name
+  tags: filesystem
+
+- name: Get disk size
+  shell: lsblk -l /dev/"{{ disk_name.stdout }}" | grep "disk" | awk '{print $4}'| tr -d [:alpha:]
+  register: disk_size
+  tags: filesystem
+
+- name: Get root partition size
+  shell: lsblk -l /dev/"{{ block_device.stdout }}" | grep "part" | awk '{print $4}'| tr -d [:alpha:]
+  register: root_partition_size
+  tags: filesystem
+
+- set_fact:
+    resize_needed: "{{ true if disk_size.stdout != root_partition_size.stdout else false }}"
+  tags: filesystem
+
+- name: Resize is needed?
+  debug: var=resize_needed
+  tags: filesystem
+
+- name: Install growpart
+  yum: name=cloud-utils-growpart state=present
+  when: resize_needed
+  tags: filesystem
+
+- name: Expand partition
+  command: growpart "/dev/{{ disk_name.stdout }}" "{{ block_device.stdout | regex_replace('.*[a-z]', '') }}"
+  when: resize_needed
+  tags: filesystem
+
+- name: Restart machine
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  when: resize_needed
+  ignore_errors: true
+  tags: filesystem
+
+- name: Waiting for server to come back
+  local_action: shell ssh "{{ inventory_hostname }}" echo here
+  register: test
+  retries: 30
+  delay: 10
+  until: test.stdout.find('here') != -1
+  when: resize_needed
+  tags: filesystem
+
+- name: Get root fstype
+  shell: df -T "/dev/{{ block_device.stdout }}" | awk '{print $2}' | tail -1
+  register: fstype
+  tags: filesystem
+
+- name: Resize primary volume to use all available space
+  when: resize_needed
+  ignore_errors: true
+  filesystem:
+    dev="/dev/{{ block_device.stdout }}"
+    fstype="{{ fstype.stdout }}"
+    resizefs=yes
+  tags: filesystem

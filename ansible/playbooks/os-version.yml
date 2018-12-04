@@ -1,0 +1,8 @@
+---
+- hosts: prod
+  user: aamorin
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - debug: msg="Distribution {{ansible_distribution}} - Version {{ansible_distribution_major_version}}"

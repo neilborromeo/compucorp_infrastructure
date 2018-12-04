@@ -1,0 +1,44 @@
+
+- hosts: "tag_Name_STG_HDCXI_beheard_1"
+  user: ec2-user
+  vars_files:
+    - "../vars/{{ application_environment }}/hd-cxi-beheard.yml"
+    - "../vars/{{ application_environment }}/hd-cxi-survey-api.yml"
+    - "../vars/{{ application_environment }}/hd-cxi-portal.yml"
+  vars:
+#    - bkp_proc: "{{ groups['tag_Name_HDCXI_Back_Process_Email'][0] }}"
+    - portal_ip: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~'_HDCXI_beheard_1'][0] }}"
+    - beheard_ip: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~'_HDCXI_beheard_1'][0] }}"
+    - surveyapi_ip: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~'_HDCXI_web_api_1'][0] }}"
+    - emailsystem_ip: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~'_HDCXI_back_process_email_1'][0] }}"
+    - bdstaging_ip: "{{ hostvars['localhost']['groups']['tag_Name_HDCXI_Staging'][0] }}"
+    - cryptostaging_ip: "{{ hostvars['localhost']['groups']['tag_Name_HDCXI_Email_System_Staging'][0] }}"
+    #- prueba: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~ '_HDCXI_BeHeard_Staging_1'][0] }}"
+  tasks:
+#    - debug: msg="{{beheard_ip}}, {{surveyapi_ip}} y {{emailsystem_ip}} necesitan accesos a {{bdstaging_ip}}"
+#    - debug: msg="{{surveyapi_ip}} y {{emailsystem_ip}} necesita accesos a {{cryptostaging_ip}}"
+
+
+
+- hosts: localhost
+  connection: localhost
+  gather_facts: false
+  vars_files:
+    - "../vars/{{ application_environment }}/hd-cxi-beheard.yml"
+    - "../vars/{{ application_environment }}/hd-cxi-survey-api.yml"
+    - "../vars/{{ application_environment }}/hd-cxi-portal.yml"
+  tasks:
+    - name: Add domains to /etc/hosts
+      lineinfile:
+        dest=/etc/hosts
+        regexp=".*{{item.server_name}}$"
+        line="{{item.host}} {{item.server_name}}"
+        state=present
+        backup=yes
+      become: yes
+      become_user: root
+      become_method: sudo
+      with_items:
+        - { server_name: "{{beheard.server_name}}", host: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~'_HDCXI_beheard_1'][0] }}" }
+        - { server_name: "{{portal.server_name}}", host: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~'_HDCXI_beheard_1'][0] }}" }
+        - { server_name: "{{survey_api.nginx.server_name}}", host: "{{ hostvars['localhost']['groups']['tag_Name_'~  application_environment | upper ~'_HDCXI_web_api_1'][0] }}" }

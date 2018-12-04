@@ -1,0 +1,11 @@
+- hosts: tag_Name_{{ application_environment | upper }}_CRM_web_*
+  user: ubuntu
+  become: yes
+  become_method: sudo
+  roles:
+    - base
+    - users
+    - hostname
+
+- import_playbook: compucorp-crm.yml
+#- include_playbook: db-populate.yml

@@ -1,0 +1,133 @@
+---
+- name: PHP | Add php-{{ fpm.version }} PPA
+  apt_repository: repo='ppa:ondrej/php'
+                  state=present
+                  update_cache=yes
+  become: yes
+  tags: php_install
+
+- name: PHP | install php packages
+  apt:
+    pkg:
+      - php-pear
+      - php{{ fpm.version }}-fpm
+      - php{{ fpm.version }}-cli
+      - php{{ fpm.version }}-curl
+      - php{{ fpm.version }}-gd
+      - php{{ fpm.version }}-mysql
+      - php{{ fpm.version }}-mbstring
+      - php{{ fpm.version }}-common
+      - php{{ fpm.version }}-json
+#      - php{{ fpm.version }}-mcrypt
+#      - php{{ fpm.version }}-odbc
+#      - php{{ fpm.version }}-pgsql
+      - php{{ fpm.version }}-xmlrpc
+      - php{{ fpm.version }}-opcache
+      - php{{ fpm.version }}-intl
+      - php{{ fpm.version }}-bz2
+      - php{{ fpm.version }}-xml
+      - php{{ fpm.version }}-zip
+      - php{{ fpm.version }}-soap
+      - php{{ fpm.version }}-dev
+      - php{{ fpm.version }}-opcache
+    state: present
+  become: yes
+  tags: php_install
+
+- name: Install mcrypt compiler deps
+  apt:
+    pkg:
+      - 'gcc'
+      - 'make'
+      - 'autoconf'
+      - 'libc-dev'
+      - 'pkg-config'
+      - 'libmcrypt-dev'
+      - 'python-pexpect'
+    state: present
+  register: php_mcrypt_install_deps
+  become: yes
+  tags: php_install
+  ignore_errors: yes
+
+- name: Get mcrypt file stat
+  stat:
+    path: /usr/lib/php/20170718/mcrypt.so
+  register: mcrypt_extension
+  tags: php_install
+
+- name: Install mcrypt PECL extension on php 7.2
+#  shell: echo "\n" | sudo pecl install mcrypt-1.0.1
+  expect:
+    command: sudo pecl install mcrypt-1.0.1
+    responses:
+      autodetect: "\n"
+  when: not mcrypt_extension.stat.exists
+  register: pcl_install_result
+#  changed_when: not mcrypt_extension.stat.exists
+  become: true
+  tags: php_install
+
+# non-interactive bug
+#- name: Separate install of mcrypt on php 7.2
+#  pear:
+#    name: pecl/mcrypt-1.0.1
+#    state: present
+#  when: php_mcrypt_install_deps is succeeded
+#  become: true
+#  tags: php_install
+
+- name: Copy mcrypt.so to php module dir
+  template:
+    src=mcrypt.ini.j2
+    dest=/etc/php/{{fpm.version}}/mods-available/mcrypt.ini
+    owner=root
+    group=root
+    mode=0644
+  when: php_mcrypt_install_deps is succeeded
+  become: true
+  tags: php_install
+
+- name: Install mcrypt module to php
+  file:
+    src: "/etc/php/{{fpm.version}}/mods-available/mcrypt.ini"
+    dest: "{{ item.dest }}"
+    state: link
+  with_items:
+    - { dest: "/etc/php/{{fpm.version}}/fpm/conf.d/20-mcrypt.ini" }
+    - { dest: "/etc/php/{{fpm.version}}/cli/conf.d/20-mcrypt.ini" }
+  when: php_mcrypt_install_deps is succeeded
+  become: true
+  tags: php_install
+
+- name: PHP | FPM php.ini
+  template:
+    src=php.ini.j2
+    dest=/etc/php/{{ fpm.version }}/fpm/php.ini
+    backup=yes
+    owner=root
+    group=root
+    mode=0644
+  become: yes
+  tags: php_install
+
+- name: PHP | CLI php.ini
+  template:
+    src=php.cli.ini.j2
+    dest=/etc/php/{{ fpm.version }}/cli/php.ini
+    backup=yes
+    owner=root
+    group=root
+    mode=0644
+  become: yes
+  tags: php_install
+
+- name: PHP | restart nginx
+  raw: service nginx restart
+  become: yes
+  tags: php_install
+
+- name: PHP | restart fpm
+  raw: service php{{ fpm.version }}-fpm restart
+  become: yes
+  tags: php_install

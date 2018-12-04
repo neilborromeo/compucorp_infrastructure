@@ -1,0 +1,8 @@
+---
+dependencies:
+  - { role: swapfile }
+  - { role: nginx }
+  - { role: php-fpm }
+  - { role: mysql }
+  - { role: drupal }
+  - { role: drush }

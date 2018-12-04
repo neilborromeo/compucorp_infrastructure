@@ -1,0 +1,10 @@
+---
+- name: Main playbook
+  hosts: all
+  user: root
+#  user: ec2-user
+  become: yes
+  roles:
+    - base
+    - users
+    - hostname

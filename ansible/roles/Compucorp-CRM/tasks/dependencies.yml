@@ -1,0 +1,37 @@
+---
+
+- name: Install webtatic repo (for php56w)
+  yum: name="https://mirror.webtatic.com/yum/el6/latest.rpm" state=present
+  tags:
+    - common
+
+- name: Install dependencies
+  yum: name="{{item}}" state=present
+  with_items:
+    - "java-1.7.0-openjdk"
+    - "php56w-gd"
+    - "php56w-mysql"
+    - "php56w-pdo"
+    - "php56w-xml"
+    - "php56w-common"
+    - "php56w-mcrypt"
+    - "php56w-mbstring"
+    - "php56w-cli"
+    - "php56w-fpm"
+    - "git"
+  register: install_deps
+  failed_when: "install_deps.rc != 0"
+  tags: 
+    - common
+    - beheard
+    - landing
+
+- name: Install bower
+  shell: "npm install -g bower"
+  tags:
+    - common
+
+- name: Install composer
+  script: install_composer.sh
+  tags:
+    - common

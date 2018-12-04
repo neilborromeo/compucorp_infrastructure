@@ -1,0 +1,12 @@
+---
+- include: groups.yml
+  tags:
+    - users
+    - groups
+    
+- include: users.yml
+  tags:
+    - users
+- include: sudoers.yml
+  tags:
+    - sudoers_template

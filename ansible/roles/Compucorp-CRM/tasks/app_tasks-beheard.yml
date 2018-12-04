@@ -1,0 +1,55 @@
+---
+
+- name: Update fonts cache
+  shell: "fc-cache {{fonts.install_path}}"
+  tags:
+    - common
+
+- name: Fix permissions
+  file: path="{{beheard.install_path}}"
+        owner="{{beheard.install_user}}"
+        state=directory
+        recurse=yes
+  tags:
+    - beheard
+
+- name: Execute composer install on app path
+  command: composer install chdir="{{beheard.install_path}}"
+  become: yes
+  become_method: su
+  become_user: "{{beheard.install_user}}"
+  register: composer_install
+  failed_when: "composer_install.rc != 0"
+  tags:
+    - beheard
+
+- name: Execute bower install on www path
+  command: bower install chdir="{{beheard.install_path}}/www"
+  become: yes
+  become_method: su
+  become_user: "{{beheard.install_user}}"
+  register: bower_install
+  failed_when: "bower_install.rc != 0"
+  tags:
+    - beheard
+
+- name: Copy .env template file
+  copy: remote_src="True"
+        src="{{beheard.install_path}}/.env.example"
+        dest="{{beheard.install_path}}/.env"
+        owner="{{beheard.install_user}}"
+        mode="0640"
+  tags:
+    - beheard
+
+- name: Change .env to reflect real values (set in defaults/main.yml or in group_vars/ENV/..)
+  lineinfile: backup=no
+              dest="{{beheard.install_path}}/.env"
+              regexp="^{{item.key}}"
+              line="{{item.key}}=\"{{item.value}}\""
+              state=present
+              owner="{{beheard.install_user}}"
+              mode="0640"
+  with_dict: "{{ beheard.app_env_vars }}"
+  tags:
+    - beheard

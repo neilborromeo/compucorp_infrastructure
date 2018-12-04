@@ -1,0 +1,46 @@
+---
+- name: Add Nginx Repository
+  apt_repository: repo='ppa:nginx/stable' state=present
+  register: nginx_stable_repository
+  tags: nginx_install
+
+- name: Install nginx latest stable
+  apt: name=nginx state=present update_cache=true
+  when: nginx_stable_repository is success
+  register: nginx_installed
+  notify:
+    - start nginx
+  tags: nginx_install
+
+- name: Copy nginx configuration for Drupal 7
+  template: src=default.yml.j2 dest=/etc/nginx/conf.d/default.conf
+  notify: restart nginx
+  tags: nginx_install
+
+#- name: Copy nginx configuration for CiviCRM
+#  template: src=default.conf dest=/etc/nginx/conf.d/default.conf
+#  notify: restart nginx
+
+#- name: Copy nginx configuration for Drush
+#  template: src=default.conf dest=/etc/nginx/conf.d/default.conf
+#  notify: restart nginx
+
+- name: Check default configuration
+  stat: path="/etc/nginx/sites-enabled/default"
+  register: nginx_default_config
+  ignore_errors: true
+  tags: nginx_install
+
+- name: Remove symlink of nginx default configuration
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  when: not nginx_default_config.stat.exists
+  become: true
+  tags: nginx_install
+
+- name: Enable & start Nginx
+  service: name=nginx
+           state=started
+           enabled=yes
+  tags: nginx_install

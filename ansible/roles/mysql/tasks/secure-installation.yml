@@ -1,0 +1,66 @@
+---
+- name: Ensure default user is present.
+  mysql_user:
+    name: "{{ db_user }}"
+    host: 'localhost'
+    password: "{{ db_user_password }}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  tags: mysql_install
+
+- name: Copy user-my.cnf file with password credentials.
+  template:
+    src: "user-my.cnf.j2"
+    dest: "/home/ubuntu/.my.cnf"
+    owner: "ubuntu"
+    mode: 0600
+  tags: mysql_install
+
+- name: Disallow root login remotely
+  command: 'mysql -NBe "{{ item }}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
+  changed_when: false
+  tags: mysql_install
+
+- name: Get list of hosts for the root user.
+  command: mysql -NBe "SELECT Host FROM mysql.user WHERE User = 'root' ORDER BY (Host='localhost') ASC"
+  register: mysql_root_hosts
+  changed_when: false
+  check_mode: false
+  tags: mysql_install
+
+- name: Update MySQL root password for localhost root account (5.7.x).
+  shell: >
+    mysql -u root -NBe
+    'ALTER USER "root"@"{{ item }}" IDENTIFIED WITH mysql_native_password BY "{{ db_root_password }}";'
+  with_items: "{{ mysql_root_hosts.stdout_lines|default([]) }}"
+  tags: mysql_install
+
+- name: Copy .my.cnf file with root password credentials.
+  template:
+    src: "root-my.cnf.j2"
+    dest: "/root/.my.cnf"
+    owner: root
+    group: root
+    mode: 0600
+  tags: mysql_install
+
+- name: Get list of hosts for the anonymous user.
+  command: mysql -NBe 'SELECT Host FROM mysql.user WHERE User = ""'
+  register: mysql_anonymous_hosts
+  changed_when: false
+  check_mode: false
+  tags: mysql_install
+
+- name: Remove anonymous MySQL users.
+  mysql_user:
+    name: ""
+    host: "{{ item }}"
+    state: absent
+  with_items: "{{ mysql_anonymous_hosts.stdout_lines|default([]) }}"
+  tags: mysql_install
+
+- name: Remove MySQL test database.
+  mysql_db: "name='test' state=absent"
+  tags: mysql_install

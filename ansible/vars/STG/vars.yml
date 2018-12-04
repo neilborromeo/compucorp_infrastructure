@@ -1,0 +1,10 @@
+application_environment: STG
+domain: compucorp.neilborromeo.com
+
+users_state:
+  appadmin: present
+  nborromeo: present
+
+users_enabled_as_root:
+  appadmin: present
+  nborromeo: present

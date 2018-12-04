@@ -1,0 +1,21 @@
+- hosts: packer-ami
+  become: yes
+  become_method: sudo
+  gather_facts: False
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (sudo apt-get -y update && sudo apt-get install -y python-minimal)
+      changed_when: False
+    - setup: # aka gather_facts
+
+  vars:
+    users_state:
+      nborromeo: present
+      appadmin: present
+
+    users_enabled_as_root:
+      nborromeo: present
+      appadmin: present
+  roles:
+    - base
+    - users

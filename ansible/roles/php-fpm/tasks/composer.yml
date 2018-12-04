@@ -1,0 +1,11 @@
+---
+- name: PHP | Check if Composer is installed (ignore if fails)
+  stat: "path=/usr/local/bin/composer"
+  register: composer_installed
+  tags: composer_install
+
+- name: PHP | Install Composer
+  shell: curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+  changed_when: not composer_installed.stat.exists
+  become: yes
+  tags: composer_install

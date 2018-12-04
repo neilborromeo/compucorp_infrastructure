@@ -1,0 +1,36 @@
+---
+# Group creation for every user, making it that their primary group
+users_create_per_user_group: true
+
+# Default user groups
+default_groups:
+  devs: present
+  devops: present
+  apps: present
+
+# If we're not creating a per-user group, then this is the group all users
+# belong to
+users_group: users
+
+# The default shell for a user if none is specified
+users_default_shell: /bin/bash
+
+# Create home dirs for new users? Set this to false if you manage home
+# directories in some other way.
+users_create_homedirs: true
+
+# Lists of users to create and delete
+users:
+  #APP OWNER
+  appadmin:
+    name: Compucorp app user
+    groups: ['appadmin','apps','www-data']
+    uid: 1101
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCoQh7VVBLmMlOlZqM1CQRgpJj+fhnWvkMTMusCYPXOv9vUCNsfgGQcGzHMuALYdd4bM8F5W4DTIQj9wJBWw740mjpstIaHmMd14COCso2WeIcqJLDJ3EJMln6bSJAy4Bzb7wucHHlpk4gUj1dVb6lSZFIdKUnQQg7BZ2iJT3yDPI3g0CZDOJU2C8sPgYACYks0K2ZifDtEEx0MB2QGAE+xobTWhOMsCwXB/N9W77Ov2vTNg7ZKxKQ5/9abMhaJ73pzrdnOF+g2KeuTkF/UEFpBxNW32f3RvqXqLmx7XXBgmfVoJlQT4ThwWvSK7uYTgDv9G5kzi7ZR0AK1U6tSsk63J5QRfx9DJKgbiq+cRH/jcY5i9DgE6mlQP2IeIFB8YEN87biY4vtATZmnkDP7sh6gJjJzByWvUZ5lQzldyR0YUVmmt0+kNNF+LWAIyCnCTP8NtDCxx5S8SOWP3G3WFIuAjxxPfsh4VSHjSigDtMk0pmBDBGgGvO9Vu6VdRyV6v8/JhZzGrgOQTu4QKaMfSeY6adC9qBnky6s9ytKlpE5jivDTmFsHrfcZlCmYt3Ro2JUDpQgxLj4otYin3O2GPrOurTwu3jpP0I35TzmAHFUh5orIH+nPWggl3ClxIrKkMQMqrt7WoCllk89I5ozNzcJ4KqFHnS4EmwhpGDCPy52eiw== appadmin"
+  #DEVOPS
+  nborromeo:
+    name: "Neil Borromeo"
+    groups: ['nborromeo','devops','devs','apps','www-data']
+    uid: 1201
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDEkmcmk4+LLr3lUd+cuIQYUkcQdSkq1NFHciqooBrKp5MPUYTBsiLEOxMfU+vijKYeQBZOs4YMRuczaZ1Vx8kqErnWMqvzhG6//6LHyXNyC4PhzLGY0kLHJZrGD3S5E0KJ8BIZaTd0QSKDHHpjM+ms6Kea/jZmtuYjG70+JBw5oAveDRxnxXszJyT/ZWSTXKQny/nXmvcIiGyC0PgPbGxJL3a2Cb7GWcAdi+A4q14TjGhFfH/xjl7+ePOmRR99rsToN9lxp2avoPstP+/t3P8RBEFzbNgOlkBj0lXCLKdhDEF7Y0A+Q3ZuiIfh7urbw1J6gDhhJvUlSn8BwDz5ZTyyzF3lUhA7PrQpGGQgcjtDZviIwh2zELJ0lUXMr/OsgW9BT5wIHmWM1CRv2l95u9LtghCc6YkWmlF9cTevNOxboPmQ/KSvvZM6+OUfKCefjWsQ5F5gtvM0VzoBlQRs9fef112TlhWdyI1YqYJR8D8qyanTl2zSUAv8uSilNWRTiF0/SkMXW9As/sizGOxB7nOczdGT3bsPXgDb0aOshpCTJtnZb7KN+xQ9lnf6HMWASjGEUhueSLFSOfGksEolZ4sS2Y0jbud1ysCp1srSQLDHon21mCtK1C52hQ935tu6xivFj1Xca6ZY89etarW56ApnBlYv0hzPhYvVP9SC+XVL7Q== compucorp.neil"
+  #DEVS

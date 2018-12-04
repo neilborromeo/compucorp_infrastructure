@@ -1,0 +1,23 @@
+---
+
+- name: Deploy www php-fpm config file
+  template: src="php_fpm.conf.j2"
+            dest="/etc/php-fpm.d/www.conf"
+            owner=root
+            group=root
+            mode=0644
+  notify: restart php_fpm
+  tags:
+    - common
+
+- name: Deploy Nginx BeHeard template config file
+  template: src="beheard.conf.j2"
+            dest="/etc/nginx/conf.d/beheard.conf"
+            owner=root
+            group=root
+            mode=0644
+  notify: restart nginx
+  tags:
+    - common
+    - beheard
+    - landing

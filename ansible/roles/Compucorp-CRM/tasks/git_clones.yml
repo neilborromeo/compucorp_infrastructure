@@ -1,0 +1,30 @@
+---
+
+- name: Clone BeHeard Git repo 
+  git: clone=yes
+       accept_hostkey="true"
+       dest="{{beheard.install_path}}"
+       repo="{{beheard.repo_url}}"
+       version="{{beheard.repo_branch}}"
+  tags:
+    - beheard
+
+- name: Clone fonts repo
+  git: clone=yes
+       accept_hostkey="true"
+       dest="{{fonts.install_path}}"
+       repo="{{fonts.repo_url}}"
+       version="{{fonts.repo_branch}}"
+  tags: 
+    - common
+
+
+- name: Clone Landing git repo
+  git: clone=yes
+       accept_hostkey="true"
+       dest="{{landing.install_path}}"
+       repo="{{landing.repo_url}}"
+       version="{{landing.repo_branch}}"
+  tags:
+    - landing
+

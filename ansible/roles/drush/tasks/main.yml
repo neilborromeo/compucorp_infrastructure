@@ -1,0 +1,8 @@
+---
+- include_tasks: install-drush-launcher.yml
+  when: drush_launcher_install
+  tags: install_drush
+
+- include_tasks: install-drush-composer.yml
+  when: drush_composer_global_install
+  tags: install_drush

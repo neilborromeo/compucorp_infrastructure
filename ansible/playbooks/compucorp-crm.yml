@@ -1,0 +1,9 @@
+---
+- name: Main playbook
+  hosts: "tag_Name_{{ application_environment | upper }}_CRM_web_*"
+  user: ubuntu
+  become: yes
+  become_method: sudo
+  vars_files: "../vars/{{ application_environment }}/compucorp-crm.yml"
+  roles:
+    - Compucorp-CRM

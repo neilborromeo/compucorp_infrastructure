@@ -1,0 +1,20 @@
+- name: Add ssh keys to root users
+  authorized_key: user="ubuntu" key="{{ users[item.key].ssh_key }}" state="{{ item.value }}"
+  with_dict: "{{ users_enabled_as_root }}"
+
+- name: Add new users
+  user: name="{{ item.key }}"
+        group="{{ item.key if users_create_per_user_group else users_group }}"
+        groups="{{ users[item.key].groups | join(',') }}"
+        shell="{{ users[item.key].shell if users[item.key].shell is defined else users_default_shell }}"
+        comment="{{ users[item.key].name }}"
+        uid="{{ users[item.key].uid }}"
+        createhome="{{ 'yes' if users_create_homedirs else 'no' }}"
+        state="{{ item.value }}"
+        remove=yes
+  with_dict: "{{ users_state }}"
+
+- name: Add SSH keys to users
+  authorized_key: user="{{ item.key }}" key="{{ users[item.key].ssh_key }}" state="{{ item.value }}"
+  with_dict: "{{ users_state }}"
+  when: item.value == 'present'

@@ -1,0 +1,14 @@
+---
+# Role for instance hostname setup in Ubuntu system
+- name: Set hostname 
+  shell: hostname '{{ hostvars[inventory_hostname].ec2_tag_hostname }}'
+# The hostname module fails  because of an out-of-date python version on the AMI, that can't identify properly the system saying it's Darwin type..
+#  hostname: name='{{ hostvars[inventory_hostname].ec2_tag_hostname }}'
+
+- name: Set /etc/hostname
+  template: src=hostname.j2 dest=/etc/hostname owner=root group=root mode=0644
+
+- name: Set /etc/hosts
+  template: src=hosts.j2 dest=/etc/hosts owner=root group=root mode=0644
+  notify:
+    - set hostname

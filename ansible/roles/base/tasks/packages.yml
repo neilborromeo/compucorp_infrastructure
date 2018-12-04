@@ -1,0 +1,24 @@
+- name: Install deps and some tools
+  apt:
+    pkg:
+      - 'software-properties-common'
+      - 'python-software-properties'
+      - 'build-essential'
+      - 'curl'
+      - 'wget'
+      - 'zip'
+      - 'unzip'
+      - 'mailutils'
+      - 'git'
+      - 'vim'
+      - 'mlocate'
+      - 'man'
+      - 'manpages'
+      - 'net-tools'
+      - 'sysstat'
+    state: present
+  register: installdeps
+  tags:
+    - depsandtools
+    - base
+  ignore_errors: yes

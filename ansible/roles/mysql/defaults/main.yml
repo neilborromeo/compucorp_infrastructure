@@ -1,0 +1,14 @@
+---
+mysql_databases:
+  - name: civicrm
+    collation: utf8_general_ci
+    encoding: utf8
+    replicate: 1
+  - name: drupal7
+    collation: utf8_general_ci
+    encoding: utf8
+    replicate: 1
+
+# Whether my.cnf should be updated on every run.
+overwrite_global_mycnf: true
+mysql_config_file: /etc/my.cnf

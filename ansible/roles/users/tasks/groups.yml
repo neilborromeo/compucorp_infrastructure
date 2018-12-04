@@ -1,0 +1,13 @@
+- name: Manage default groups
+  group:
+    name: "{{ item.key }}"
+    state: "{{ item.value }}"
+  with_dict: "{{ default_groups }}"
+
+- name: Per user group creation
+  group:
+    name: "{{ item.key }}"
+    gid: "{{ users[item.key].uid }}"
+    state: "{{ item.value }}"
+  with_dict: "{{ users_state }}"
+  when: users_create_per_user_group and item.value == 'present'

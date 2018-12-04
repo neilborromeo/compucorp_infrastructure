@@ -1,0 +1,23 @@
+Remember to put something like this on Nginx conf:
+
+        location ~ \.php$ {
+                try_files $uri =404;
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                # NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini
+
+                # With php5-cgi alone:
+                #fastcgi_pass 127.0.0.1:9000;
+                # With php5-fpm:
+                fastcgi_pass unix:/var/run/php5-fpm.sock;
+                fastcgi_index index.php;
+                include fastcgi_params;
+        }
+
+
+Verify the default php-fpm unix sock path and after restarting Nginx, test it with a simple php info page:
+
+<?php
+phpinfo();
+?>
+
+

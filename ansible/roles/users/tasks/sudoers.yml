@@ -1,0 +1,9 @@
+- name: Ensure sudoers templates are present
+  template: src="{{ item }}.j2"
+            dest="/etc/sudoers.d/{{ item }}"
+            group=root
+            owner=root
+            mode=0600
+  with_items:
+    - DevOps
+    - Devs

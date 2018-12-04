@@ -1,0 +1,14 @@
+#---
+# include: dependencies.yml
+#- include: git_clones.yml
+#  tags:
+#    - deploy_application
+#- include: app_tasks-beheard.yml
+#  tags:
+#    - deploy_application
+#- include: app_tasks-landing.yml
+#  tags:
+#    - deploy_application
+#- include: nginx_config.yml
+#- include: hosts.yml
+
